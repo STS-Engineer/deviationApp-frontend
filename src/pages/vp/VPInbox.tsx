@@ -22,17 +22,18 @@ export default function VPInbox() {
       getVPInbox(user.email, false),
       getVPInbox(user.email, true)
     ]).then(([escalated, archived]) => {
+      // Backend already filters, so we just combine them
       setAllRequests([...escalated, ...archived] as PricingRequest[]);
       setLoading(false);
     });
-  }, [user?.email, showArchived]);
+  }, [user?.email]);
 
   const escalatedRequests = allRequests.filter(
     (r) => r.status === RequestStatus.ESCALATED_TO_VP
   );
 
   const archivedRequests = allRequests.filter(
-    (r) => r.status === RequestStatus.APPROVED_BY_VP || r.status === RequestStatus.REJECTED_BY_VP || r.status === RequestStatus.CLOSED
+    (r) => r.status !== RequestStatus.ESCALATED_TO_VP
   );
 
   const displayedRequests = showArchived ? archivedRequests : escalatedRequests;

@@ -22,17 +22,18 @@ export default function PLInbox() {
       getPLInbox(user.email, false),
       getPLInbox(user.email, true)
     ]).then(([pending, archived]) => {
+      // Backend already filters, so we just combine them
       setAllRequests([...pending, ...archived] as PricingRequest[]);
       setLoading(false);
     });
-  }, [user?.email, showArchived]);
+  }, [user?.email]);
 
   const pendingRequests = allRequests.filter(
     (r) => r.status === RequestStatus.UNDER_REVIEW_PL
   );
 
   const archivedRequests = allRequests.filter(
-    (r) => r.status === RequestStatus.APPROVED_BY_PL || r.status === RequestStatus.REJECTED_BY_PL || r.status === RequestStatus.ESCALATED_TO_VP || r.status === RequestStatus.APPROVED_BY_VP || r.status === RequestStatus.REJECTED_BY_VP || r.status === RequestStatus.CLOSED
+    (r) => r.status !== RequestStatus.UNDER_REVIEW_PL
   );
 
   const displayedRequests = showArchived ? archivedRequests : pendingRequests;
