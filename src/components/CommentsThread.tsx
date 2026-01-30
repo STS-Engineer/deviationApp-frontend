@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../api/client";
+import NotificationBar from "./NotificationBar";
 
 interface Comment {
   id: number;
@@ -22,6 +23,7 @@ export default function CommentsThread({ requestId, currentUserEmail }: Comments
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successNotification, setSuccessNotification] = useState("");
 
   useEffect(() => {
     loadComments();
@@ -51,6 +53,8 @@ export default function CommentsThread({ requestId, currentUserEmail }: Comments
       setNewComment("");
       await loadComments();
       setError("");
+      setSuccessNotification("✅ Comment posted successfully! Notifications sent to all stakeholders.");
+      setTimeout(() => setSuccessNotification(""), 5000);
     } catch (err) {
       console.error("Failed to add comment:", err);
       setError("Failed to add comment");
@@ -89,6 +93,16 @@ export default function CommentsThread({ requestId, currentUserEmail }: Comments
 
   return (
     <div style={{ display: "grid", gap: "20px" }}>
+      {successNotification && (
+        <NotificationBar
+          type="success"
+          message={successNotification}
+          autoClose={true}
+          duration={5000}
+          onClose={() => setSuccessNotification("")}
+        />
+      )}
+      
       <div>
         <h3 style={{ margin: "0 0 16px 0", color: "#0f2a44", fontSize: "16px", fontWeight: 600 }}>
           💬 Discussion Thread

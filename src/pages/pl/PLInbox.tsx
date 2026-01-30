@@ -13,11 +13,12 @@ export default function PLInbox() {
   const nav = useNavigate();
 
   useEffect(() => {
+    setLoading(true);
     api.get("/pricing-requests").then((res) => {
       setAllRequests(res.data);
       setLoading(false);
     });
-  }, []);
+  }, [showArchived]);
 
   const pendingRequests = allRequests.filter(
     (r) => r.status === RequestStatus.UNDER_REVIEW_PL
@@ -193,15 +194,23 @@ export default function PLInbox() {
                       <td style={{ padding: "12px 16px" }}>
                         <div style={{
                           padding: "6px 10px",
-                          backgroundColor: req.status === RequestStatus.APPROVED_BY_PL ? "#d1fae5" : "#fee2e2",
-                          border: `1px solid ${req.status === RequestStatus.APPROVED_BY_PL ? "#6ee7b7" : "#fca5a5"}`,
+                          backgroundColor: showArchived 
+                            ? (req.status === RequestStatus.APPROVED_BY_PL ? "#d1fae5" : "#fee2e2")
+                            : "#e3f2fd",
+                          border: `1px solid ${showArchived 
+                            ? (req.status === RequestStatus.APPROVED_BY_PL ? "#6ee7b7" : "#fca5a5")
+                            : "#90caf9"}`,
                           borderRadius: "4px",
-                          color: req.status === RequestStatus.APPROVED_BY_PL ? "#065f46" : "#991b1b",
+                          color: showArchived 
+                            ? (req.status === RequestStatus.APPROVED_BY_PL ? "#065f46" : "#991b1b")
+                            : "#1565c0",
                           fontWeight: 600,
                           textAlign: "center",
                           fontSize: "13px"
                         }}>
-                          {req.status === RequestStatus.APPROVED_BY_PL ? "✓ Approved" : "✗ Rejected"}
+                          {showArchived 
+                            ? (req.status === RequestStatus.APPROVED_BY_PL ? "✓ Approved" : "✗ Rejected")
+                            : "⏳ Under Review"}
                         </div>
                       </td>
                       <td style={{ padding: "12px 16px", textAlign: "right" }}>
