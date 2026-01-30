@@ -140,7 +140,7 @@ export default function VPInbox() {
                   <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>PL Suggested</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Deviation</th>
                   {!showArchived && <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Pending</th>}
-                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Status</th>
+                  {showArchived && <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Status</th>}
                   <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}></th>
                 </tr>
               </thead>
@@ -198,28 +198,22 @@ export default function VPInbox() {
                           })()}
                         </td>
                       )}
-                      <td style={{ padding: "12px 16px" }}>
-                        <div style={{
-                          padding: "6px 10px",
-                          backgroundColor: showArchived 
-                            ? (req.status === RequestStatus.APPROVED_BY_VP ? "#d1fae5" : "#fee2e2")
-                            : "#e3f2fd",
-                          border: `1px solid ${showArchived 
-                            ? (req.status === RequestStatus.APPROVED_BY_VP ? "#6ee7b7" : "#fca5a5")
-                            : "#90caf9"}`,
-                          borderRadius: "4px",
-                          color: showArchived 
-                            ? (req.status === RequestStatus.APPROVED_BY_VP ? "#065f46" : "#991b1b")
-                            : "#1565c0",
-                          fontWeight: 600,
-                          textAlign: "center",
-                          fontSize: "13px"
-                        }}>
-                          {showArchived 
-                            ? (req.status === RequestStatus.APPROVED_BY_VP ? "✓ Approved" : "✗ Rejected")
-                            : "⏳ Escalated"}
-                        </div>
-                      </td>
+                      {showArchived && (
+                        <td style={{ padding: "12px 16px" }}>
+                          <div style={{
+                            padding: "6px 10px",
+                            backgroundColor: req.status === RequestStatus.APPROVED_BY_VP ? "#d1fae5" : "#fee2e2",
+                            border: `1px solid ${req.status === RequestStatus.APPROVED_BY_VP ? "#6ee7b7" : "#fca5a5"}`,
+                            borderRadius: "4px",
+                            color: req.status === RequestStatus.APPROVED_BY_VP ? "#065f46" : "#991b1b",
+                            fontWeight: 600,
+                            textAlign: "center",
+                            fontSize: "13px"
+                          }}>
+                            {req.status === RequestStatus.APPROVED_BY_VP ? "✓ Approved" : "✗ Rejected"}
+                          </div>
+                        </td>
+                      )}
                       <td style={{ padding: "12px 16px", textAlign: "right" }}>
                         <button
                           onClick={() => nav(`/vp/${req.id}`)}
