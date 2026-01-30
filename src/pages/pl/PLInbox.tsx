@@ -7,43 +7,49 @@ import NotificationBar from "../../components/NotificationBar";
 import { getDaysPending, getStatusColor, getStatusLabel } from "../../utils/dateUtils";
 
 export default function PLInbox() {
-  const [requests, setRequests] = useState<PricingRequest[]>([]);
+  const [allRequests, setAllRequests] = useState<PricingRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showArchived, setShowArchived] = useState(false);
   const nav = useNavigate();
 
   useEffect(() => {
     api.get("/pricing-requests").then((res) => {
-      const all: PricingRequest[] = res.data;
-      setRequests(
-        all.filter(
-          (r) => r.status === RequestStatus.UNDER_REVIEW_PL
-        )
-      );
+      setAllRequests(res.data);
       setLoading(false);
     });
   }, []);
 
+  const pendingRequests = allRequests.filter(
+    (r) => r.status === RequestStatus.UNDER_REVIEW_PL
+  );
+
+  const archivedRequests = allRequests.filter(
+    (r) => r.status === RequestStatus.APPROVED_BY_PL || r.status === RequestStatus.REJECTED_BY_PL
+  );
+
+  const displayedRequests = showArchived ? archivedRequests : pendingRequests;
+
   if (loading) return <div style={{ padding: "20px" }}>Loading requests...</div>;
 
-  const totalDeviation = requests.reduce((sum, r) => sum + (r.initial_price - r.target_price), 0);
-  const avgDeviation = requests.length > 0 ? totalDeviation / requests.length : 0;
+  const totalDeviation = displayedRequests.reduce((sum, r) => sum + (r.initial_price - r.target_price), 0);
+  const avgDeviation = displayedRequests.length > 0 ? totalDeviation / displayedRequests.length : 0;
 
   return (
     <div style={{ display: "grid", gap: "24px" }}>
       {/* Pending Requests Notification */}
-      {requests.length > 0 && (
+      {!showArchived && pendingRequests.length > 0 && (
         <NotificationBar
           type="warning"
-          message={`You have ${requests.length} ${requests.length === 1 ? "request" : "requests"} awaiting your review`}
+          message={`You have ${pendingRequests.length} ${pendingRequests.length === 1 ? "request" : "requests"} awaiting your review`}
           autoClose={false}
         />
       )}
 
       {/* Header */}
       <div>
-        <h1 style={{ margin: 0, color: "#0f2a44" }}>
+        <h1 style={{ margin: 0, color: "#ffffff" }}>
           🔍 Product Line Inbox
-          {requests.length > 0 && (
+          {!showArchived && pendingRequests.length > 0 && (
             <span style={{
               marginLeft: "12px",
               backgroundColor: "#f59e0b",
@@ -53,27 +59,69 @@ export default function PLInbox() {
               fontSize: "14px",
               fontWeight: 600
             }}>
-              {requests.length} Pending
+              {pendingRequests.length} Pending
             </span>
           )}
         </h1>
-        <p style={{ margin: "8px 0 0 0", color: "#666", fontSize: "14px" }}>Review and approve pricing deviation requests</p>
+        <p style={{ margin: "8px 0 0 0", color: "#e0e0e0", fontSize: "14px" }}>
+          {showArchived ? "View archived requests and continue discussions" : "Review and approve pricing deviation requests"}
+        </p>
+      </div>
+
+      {/* Toggle Buttons */}
+      <div style={{ display: "flex", gap: "12px" }}>
+        <button
+          onClick={() => setShowArchived(false)}
+          style={{
+            padding: "10px 20px",
+            background: !showArchived ? "#f59e0b" : "#f3f4f6",
+            color: !showArchived ? "white" : "#333",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: 600,
+            transition: "all 0.2s",
+          }}
+        >
+          📋 Pending ({pendingRequests.length})
+        </button>
+        <button
+          onClick={() => setShowArchived(true)}
+          style={{
+            padding: "10px 20px",
+            background: showArchived ? "#10b981" : "#f3f4f6",
+            color: showArchived ? "white" : "#333",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: 600,
+            transition: "all 0.2s",
+          }}
+        >
+          📁 Archived ({archivedRequests.length})
+        </button>
       </div>
 
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-        <StatCard label="Pending Review" value={requests.length} color="#f59e0b" icon="⏳" />
-        <StatCard label="Total Deviation" value={`€${totalDeviation.toFixed(2)}`} color="#f59e0b" icon="📊" />
+        <StatCard label={showArchived ? "Completed Requests" : "Pending Review"} value={displayedRequests.length} color={showArchived ? "#10b981" : "#f59e0b"} icon={showArchived ? "✓" : "⏳"} />
+        <StatCard label="Total Deviation" value={`€${totalDeviation.toFixed(2)}`} color={showArchived ? "#10b981" : "#f59e0b"} icon="📊" />
         <StatCard label="Avg Deviation" value={`€${avgDeviation.toFixed(2)}`} color="#8b5cf6" icon="📈" />
       </div>
 
       {/* Requests Table */}
       <div style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
-        {requests.length === 0 ? (
+        {displayedRequests.length === 0 ? (
           <div style={{ padding: "60px 20px", textAlign: "center", color: "#999" }}>
-            <div style={{ fontSize: "48px", marginBottom: "12px" }}>📭</div>
-            <h3 style={{ margin: 0, color: "#666" }}>No pending requests</h3>
-            <p style={{ margin: "8px 0 0 0", fontSize: "14px" }}>All requests have been reviewed</p>
+            <div style={{ fontSize: "48px", marginBottom: "12px" }}>
+              {showArchived ? "📁" : "📭"}
+            </div>
+            <h3 style={{ margin: 0, color: "#666" }}>
+              {showArchived ? "No archived requests" : "No pending requests"}
+            </h3>
+            <p style={{ margin: "8px 0 0 0", fontSize: "14px" }}>
+              {showArchived ? "All completed requests will appear here" : "All requests have been reviewed"}
+            </p>
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
@@ -86,12 +134,13 @@ export default function PLInbox() {
                   <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Target Price</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Deviation</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Requester</th>
-                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Pending</th>
+                  {!showArchived && <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Pending</th>}
+                  <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}>Status</th>
                   <th style={{ padding: "12px 16px", textAlign: "left", fontWeight: 600 }}></th>
                 </tr>
               </thead>
               <tbody>
-                {requests.map((req) => {
+                {displayedRequests.map((req) => {
                   const deviation = req.initial_price - req.target_price;
                   const deviationPct = ((deviation / req.initial_price) * 100).toFixed(1);
                   return (
@@ -119,32 +168,48 @@ export default function PLInbox() {
                         <div>{req.requester_name || req.requester_email}</div>
                         <div style={{ fontSize: "12px", color: "#999" }}>{req.yearly_sales > 0 ? `${req.product_line}` : "-"}</div>
                       </td>
+                      {!showArchived && (
+                        <td style={{ padding: "12px 16px" }}>
+                          {(() => {
+                            const daysPending = getDaysPending(req.created_at);
+                            const color = getStatusColor(daysPending);
+                            return (
+                              <div style={{
+                                padding: "6px 10px",
+                                backgroundColor: color + "20",
+                                border: `1px solid ${color}`,
+                                borderRadius: "4px",
+                                color: color,
+                                fontWeight: 600,
+                                textAlign: "center",
+                                fontSize: "13px"
+                              }}>
+                                {getStatusLabel(daysPending)}
+                              </div>
+                            );
+                          })()}
+                        </td>
+                      )}
                       <td style={{ padding: "12px 16px" }}>
-                        {(() => {
-                          const daysPending = getDaysPending(req.created_at);
-                          const color = getStatusColor(daysPending);
-                          return (
-                            <div style={{
-                              padding: "6px 10px",
-                              backgroundColor: color + "20",
-                              border: `1px solid ${color}`,
-                              borderRadius: "4px",
-                              color: color,
-                              fontWeight: 600,
-                              textAlign: "center",
-                              fontSize: "13px"
-                            }}>
-                              {getStatusLabel(daysPending)}
-                            </div>
-                          );
-                        })()}
+                        <div style={{
+                          padding: "6px 10px",
+                          backgroundColor: req.status === RequestStatus.APPROVED_BY_PL ? "#d1fae5" : "#fee2e2",
+                          border: `1px solid ${req.status === RequestStatus.APPROVED_BY_PL ? "#6ee7b7" : "#fca5a5"}`,
+                          borderRadius: "4px",
+                          color: req.status === RequestStatus.APPROVED_BY_PL ? "#065f46" : "#991b1b",
+                          fontWeight: 600,
+                          textAlign: "center",
+                          fontSize: "13px"
+                        }}>
+                          {req.status === RequestStatus.APPROVED_BY_PL ? "✓ Approved" : "✗ Rejected"}
+                        </div>
                       </td>
                       <td style={{ padding: "12px 16px", textAlign: "right" }}>
                         <button
                           onClick={() => nav(`/pl/${req.id}`)}
                           style={{
                             padding: "6px 12px",
-                            background: "#f59e0b",
+                            background: showArchived ? "#10b981" : "#f59e0b",
                             color: "white",
                             border: "none",
                             borderRadius: "4px",
@@ -152,10 +217,10 @@ export default function PLInbox() {
                             fontSize: "13px",
                             fontWeight: 600,
                           }}
-                          onMouseOver={(e) => e.currentTarget.style.background = "#d97706"}
-                          onMouseOut={(e) => e.currentTarget.style.background = "#f59e0b"}
+                          onMouseOver={(e) => e.currentTarget.style.background = showArchived ? "#059669" : "#d97706"}
+                          onMouseOut={(e) => e.currentTarget.style.background = showArchived ? "#10b981" : "#f59e0b"}
                         >
-                          🔍 Review
+                          {showArchived ? "💬 View" : "🔍 Review"}
                         </button>
                       </td>
                     </tr>
