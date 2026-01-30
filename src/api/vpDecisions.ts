@@ -25,9 +25,12 @@ export type VPInboxItem = {
   created_at: string;
 };
 
-export async function getVPInbox(vpEmail: string) {
+export async function getVPInbox(vpEmail: string, archived: boolean = false) {
   const { data } = await api.get("/vp-decisions/inbox", {
-    params: { vp_email: vpEmail }
+    params: { 
+      vp_email: vpEmail,
+      archived: archived
+    }
   });
   return data as VPInboxItem[];
 }

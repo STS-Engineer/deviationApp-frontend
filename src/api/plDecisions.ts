@@ -19,13 +19,17 @@ export type PLInboxItem = {
   problem_to_solve: string;
   requester_email: string;
   requester_name: string;
+  pl_suggested_price?: number;
   status: string;
   created_at: string;
 };
 
-export async function getPLInbox(plEmail: string) {
+export async function getPLInbox(plEmail: string, archived: boolean = false) {
   const { data } = await api.get("/pl-decisions/inbox", {
-    params: { pl_email: plEmail }
+    params: { 
+      pl_email: plEmail,
+      archived: archived
+    }
   });
   return data as PLInboxItem[];
 }

@@ -1,31 +1,38 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../api/client";
+import { useAuth } from "../../context/AuthContext";
+import { getPLInbox } from "../../api/plDecisions";
 import type { PricingRequest } from "../../models/PricingRequest";
 import { RequestStatus } from "../../models/enums";
 import NotificationBar from "../../components/NotificationBar";
 import { getDaysPending, getStatusColor, getStatusLabel } from "../../utils/dateUtils";
 
 export default function PLInbox() {
+  const { user } = useAuth();
   const [allRequests, setAllRequests] = useState<PricingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
   const nav = useNavigate();
 
   useEffect(() => {
+    if (!user?.email) return;
+    
     setLoading(true);
-    api.get("/pricing-requests").then((res) => {
-      setAllRequests(res.data);
+    Promise.all([
+      getPLInbox(user.email, false),
+      getPLInbox(user.email, true)
+    ]).then(([pending, archived]) => {
+      setAllRequests([...pending, ...archived] as PricingRequest[]);
       setLoading(false);
     });
-  }, [showArchived]);
+  }, [user?.email, showArchived]);
 
   const pendingRequests = allRequests.filter(
     (r) => r.status === RequestStatus.UNDER_REVIEW_PL
   );
 
   const archivedRequests = allRequests.filter(
-    (r) => r.status === RequestStatus.APPROVED_BY_PL || r.status === RequestStatus.REJECTED_BY_PL
+    (r) => r.status === RequestStatus.APPROVED_BY_PL || r.status === RequestStatus.REJECTED_BY_PL || r.status === RequestStatus.ESCALATED_TO_VP || r.status === RequestStatus.APPROVED_BY_VP || r.status === RequestStatus.REJECTED_BY_VP || r.status === RequestStatus.CLOSED
   );
 
   const displayedRequests = showArchived ? archivedRequests : pendingRequests;

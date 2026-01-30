@@ -1,31 +1,38 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../api/client";
+import { useAuth } from "../../context/AuthContext";
+import { getVPInbox } from "../../api/vpDecisions";
 import type { PricingRequest } from "../../models/PricingRequest";
 import { RequestStatus } from "../../models/enums";
 import NotificationBar from "../../components/NotificationBar";
 import { getDaysPending, getStatusColor, getStatusLabel } from "../../utils/dateUtils";
 
 export default function VPInbox() {
+  const { user } = useAuth();
   const [allRequests, setAllRequests] = useState<PricingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
   const nav = useNavigate();
 
   useEffect(() => {
+    if (!user?.email) return;
+    
     setLoading(true);
-    api.get("/pricing-requests").then((res) => {
-      setAllRequests(res.data);
+    Promise.all([
+      getVPInbox(user.email, false),
+      getVPInbox(user.email, true)
+    ]).then(([escalated, archived]) => {
+      setAllRequests([...escalated, ...archived] as PricingRequest[]);
       setLoading(false);
     });
-  }, [showArchived]);
+  }, [user?.email, showArchived]);
 
   const escalatedRequests = allRequests.filter(
     (r) => r.status === RequestStatus.ESCALATED_TO_VP
   );
 
   const archivedRequests = allRequests.filter(
-    (r) => r.status === RequestStatus.APPROVED_BY_VP || r.status === RequestStatus.REJECTED_BY_VP
+    (r) => r.status === RequestStatus.APPROVED_BY_VP || r.status === RequestStatus.REJECTED_BY_VP || r.status === RequestStatus.CLOSED
   );
 
   const displayedRequests = showArchived ? archivedRequests : escalatedRequests;
