@@ -1,0 +1,78 @@
+name: Build and deploy Node.js app to Azure Web App - deviation-price
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+          cache: "npm"
+
+      - name: Install, build, test
+        run: |
+          npm install
+          npm run build --if-present
+          npm run test --if-present
+
+      # Package SOURCE (no node_modules). App Service will run npm install/build if configured.
+      - name: Create deployment package (exclude node_modules, git, CI files)
+        run: |
+          zip -r app.zip . \
+            -x "node_modules/*" \
+               "**/node_modules/*" \
+               ".git/*" \
+               ".github/*" \
+               ".env" \
+               ".env.*"
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: app.zip
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: node-app
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_9B11735CFE4C40BAA1466F327DADE146 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_5CDA537906ED4B60AC79F4C9839889B6 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_BB1200AE3F604C89829339CC2042D946 }}
+
+      # Make App Service build during deployment (Oryx):
+      # - runs npm install
+      # - runs npm run build (when it detects it)
+
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: deviation-price
+          slot-name: Production
+          package: app.zip
