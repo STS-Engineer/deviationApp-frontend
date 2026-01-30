@@ -4,6 +4,7 @@ import { api } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 import type { PricingRequest } from "../../models/PricingRequest";
 import StatusBadge from "../../components/StatusBadge";
+import NotificationBar from "../../components/NotificationBar";
 import { getDaysPending, getStatusColor, getStatusLabel } from "../../utils/dateUtils";
 
 export default function CommercialDashboard() {
@@ -75,9 +76,18 @@ export default function CommercialDashboard() {
 
   return (
     <div style={{ display: "grid", gap: "24px" }}>
+      {/* Pending Requests Notification */}
+      {stats.pending > 0 && (
+        <NotificationBar
+          type="warning"
+          message={`You have ${stats.pending} ${stats.pending === 1 ? "request" : "requests"} pending review from Product Line Manager`}
+          autoClose={false}
+        />
+      )}
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <h1 style={{ margin: 0, color: "#0f2a44" }}>
+          <h1 style={{ margin: 0, color: "#ffffff" }}>
             📝 My Requests Dashboard
             {stats.pending > 0 && (
               <span style={{
@@ -93,7 +103,7 @@ export default function CommercialDashboard() {
               </span>
             )}
           </h1>
-          <p style={{ margin: "8px 0 0 0", color: "#666", fontSize: "14px" }}>Track all your pricing deviation requests</p>
+          <p style={{ margin: "8px 0 0 0", color: "#e0e0e0", fontSize: "14px" }}>Track all your pricing deviation requests</p>
         </div>
         <button
           onClick={handleRefresh}

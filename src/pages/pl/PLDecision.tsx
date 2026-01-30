@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api/client";
+import { useAuth } from "../../context/AuthContext";
 import type { PricingRequest } from "../../models/PricingRequest";
+import CommentsThread from "../../components/CommentsThread";
 import { plDecide } from "../../api/plDecisions";
 
 export default function PLDecision() {
   const { id } = useParams();
   const nav = useNavigate();
+  const { user } = useAuth();
   const [request, setRequest] = useState<PricingRequest | null>(null);
   const [action, setAction] = useState<"APPROVE" | "REJECT" | "ESCALATE">("APPROVE");
   const [comments, setComments] = useState("");
@@ -41,14 +44,17 @@ export default function PLDecision() {
 
     setSubmitting(true);
     try {
-      await plDecide(request!.id, {
+      const response = await plDecide(request!.id, {
         action,
         comments,
         suggested_price: suggestedPrice,
       });
+      console.log("PL decision submitted successfully:", response);
       nav("/pl");
-    } catch (err) {
-      alert("Failed to submit decision");
+    } catch (err: any) {
+      console.error("Error submitting PL decision:", err);
+      const errorMessage = err.response?.data?.detail || err.message || "Failed to submit decision";
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -238,6 +244,13 @@ export default function PLDecision() {
             {submitting ? "Submitting..." : `Submit ${action === "APPROVE" ? "Approval" : action === "REJECT" ? "Rejection" : "Escalation"}`}
           </button>
         </div>
+      </div>
+
+      {/* Comments Thread */}
+      <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+        {request.id && user?.email && (
+          <CommentsThread requestId={request.id} currentUserEmail={user.email} />
+        )}
       </div>
     </div>
   );

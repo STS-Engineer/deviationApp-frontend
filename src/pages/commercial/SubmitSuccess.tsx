@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
+import NotificationBar from "../../components/NotificationBar";
 
 export default function SubmitSuccess() {
   const [params] = useSearchParams();
@@ -7,6 +8,13 @@ export default function SubmitSuccess() {
 
   return (
     <div style={{ display: "grid", gap: 14 }}>
+      <NotificationBar
+        type="success"
+        message="Your pricing deviation request has been submitted successfully!"
+        autoClose={true}
+        duration={5000}
+      />
+
       <h2 style={{ margin: 0 }}>Request submitted ✅</h2>
 
       <div style={{ background: "white", borderRadius: 12, padding: 18, boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}>

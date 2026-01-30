@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api/client";
+import { useAuth } from "../../context/AuthContext";
 import type { PricingRequest } from "../../models/PricingRequest";
+import CommentsThread from "../../components/CommentsThread";
 import { vpDecide } from "../../api/vpDecisions";
 
 export default function VPDecision() {
   const { id } = useParams();
   const nav = useNavigate();
+  const { user } = useAuth();
   const [request, setRequest] = useState<PricingRequest | null>(null);
   const [action, setAction] = useState<"APPROVE" | "REJECT">("APPROVE");
   const [comments, setComments] = useState("");
@@ -42,14 +45,17 @@ export default function VPDecision() {
 
     setSubmitting(true);
     try {
-      await vpDecide(request!.id, {
+      const response = await vpDecide(request!.id, {
         action,
         comments,
         suggested_price: finalPrice,
       });
+      console.log("VP decision submitted successfully:", response);
       nav("/vp");
-    } catch (err) {
-      alert("Failed to submit decision");
+    } catch (err: any) {
+      console.error("Error submitting VP decision:", err);
+      const errorMessage = err.response?.data?.detail || err.message || "Failed to submit decision";
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -261,6 +267,13 @@ export default function VPDecision() {
             {submitting ? "Submitting..." : `Submit ${action === "APPROVE" ? "Approval" : "Rejection"}`}
           </button>
         </div>
+      </div>
+
+      {/* Comments Thread */}
+      <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+        {request.id && user?.email && (
+          <CommentsThread requestId={request.id} currentUserEmail={user.email} />
+        )}
       </div>
     </div>
   );

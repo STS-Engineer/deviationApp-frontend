@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
 import type { PricingRequest } from "../../models/PricingRequest";
 import { RequestStatus } from "../../models/enums";
+import NotificationBar from "../../components/NotificationBar";
 import { getDaysPending, getStatusColor, getStatusLabel } from "../../utils/dateUtils";
 
 export default function VPInbox() {
@@ -30,6 +31,15 @@ export default function VPInbox() {
 
   return (
     <div style={{ display: "grid", gap: "24px" }}>
+      {/* Escalated Requests Notification */}
+      {requests.length > 0 && (
+        <NotificationBar
+          type="error"
+          message={`You have ${requests.length} ${requests.length === 1 ? "request" : "requests"} escalated requiring your final decision`}
+          autoClose={false}
+        />
+      )}
+
       {/* Header */}
       <div>
         <h1 style={{ margin: 0, color: "#0f2a44" }}>

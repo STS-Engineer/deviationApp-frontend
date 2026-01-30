@@ -9,7 +9,9 @@ export function getDaysPending(createdAt: string): number {
   const created = new Date(createdAt);
   const now = new Date();
   const diff = now.getTime() - created.getTime();
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  // Ensure we never return negative days (requests from today show as 0)
+  return Math.max(0, days);
 }
 
 export function getStatusColor(daysPending: number): string {

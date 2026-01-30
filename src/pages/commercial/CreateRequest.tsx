@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { submitPricingRequest } from "../../api/pricingRequests";
-import { getDropdowns } from "../../api/dropdowns";
+import { getDropdowns, getPLUsers, getVPUsers, type UserOption } from "../../api/dropdowns";
+import { useAuth } from "../../context/AuthContext";
 import type { PricingRequestCreate } from "../../api/pricingRequests";
 
 type FieldErrors = Partial<Record<keyof PricingRequestCreate, string>>;
@@ -12,10 +13,13 @@ function isAvocarbonEmail(email: string) {
 
 export default function CreateRequest() {
   const nav = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<{ name: string; path: string } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [plUsers, setPlUsers] = useState<UserOption[]>([]);
+  const [vpUsers, setVpUsers] = useState<UserOption[]>([]);
   const [dropdowns, setDropdowns] = useState({
     product_lines: [],
     plants: [],
@@ -33,8 +37,8 @@ export default function CreateRequest() {
     target_price: 0,
     problem_to_solve: "",
     attachment_path: "",
-    requester_email: "",
-    requester_name: "",
+    requester_email: user?.email || "",
+    requester_name: user?.email?.split("@")[0] || "",
     product_line_responsible_email: "",
     product_line_responsible_name: "",
     vp_email: "",
@@ -43,17 +47,23 @@ export default function CreateRequest() {
 
   const [errors, setErrors] = useState<FieldErrors>({});
 
-  // Load dropdowns on mount
+  // Load dropdowns and users on mount
   useEffect(() => {
-    async function loadDropdowns() {
+    async function loadData() {
       try {
-        const data = await getDropdowns();
-        setDropdowns(data);
+        const [dropdownData, plData, vpData] = await Promise.all([
+          getDropdowns(),
+          getPLUsers(),
+          getVPUsers(),
+        ]);
+        setDropdowns(dropdownData);
+        setPlUsers(plData);
+        setVpUsers(vpData);
       } catch (err) {
-        console.error("Failed to load dropdowns", err);
+        console.error("Failed to load data", err);
       }
     }
-    loadDropdowns();
+    loadData();
   }, []);
 
   const canSubmit = useMemo(() => !loading, [loading]);
@@ -161,7 +171,7 @@ export default function CreateRequest() {
       };
 
       const res = await submitPricingRequest(payload);
-      nav(`/commercial/submitted?request_id=${res.request_id}&status=${encodeURIComponent(res.status)}`);
+      nav(`/submitted?request_id=${res.request_id}&status=${encodeURIComponent(res.status)}`);
     } catch (err: any) {
       const msg =
         err?.response?.data?.detail ||
@@ -382,47 +392,146 @@ export default function CreateRequest() {
         <div style={{ marginBottom: 24 }}>
           <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: 700 }}>Contacts</h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 14 }}>
-            <Field
-              label="Your Name *"
-              value={form.requester_name}
-              error={errors.requester_name}
-              onChange={(v) => setField("requester_name", v)}
-              placeholder="Your full name"
-            />
-            <Field
-              label="Your Email *"
-              value={form.requester_email}
-              error={errors.requester_email}
-              onChange={(v) => setField("requester_email", v)}
-              placeholder="name@avocarbon.com"
-            />
-            <Field
-              label="PL Responsible Name"
-              value={form.product_line_responsible_name || ""}
-              onChange={(v) => setField("product_line_responsible_name", v)}
-              placeholder="Product Line Manager"
-            />
-            <Field
-              label="PL Responsible Email *"
-              value={form.product_line_responsible_email}
-              error={errors.product_line_responsible_email}
-              onChange={(v) => setField("product_line_responsible_email", v)}
-              placeholder="pl.manager@avocarbon.com"
-            />
-            <Field
-              label="VP Name (optional)"
-              value={form.vp_name || ""}
-              onChange={(v) => setField("vp_name", v)}
-              placeholder="Vice President"
-            />
-            <Field
-              label="VP Email (optional)"
-              value={form.vp_email || ""}
-              error={errors.vp_email}
-              onChange={(v) => setField("vp_email", v)}
-              placeholder="vp@avocarbon.com"
-            />
+            {/* Your Contact Info - Auto-filled */}
+            <div>
+              <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: "14px", color: "#374151" }}>
+                Your Name *
+              </label>
+              <input
+                type="text"
+                value={form.requester_name}
+                readOnly
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #d1d5db",
+                  fontSize: "14px",
+                  background: "#f9fafb",
+                  color: "#374151",
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: "14px", color: "#374151" }}>
+                Your Email *
+              </label>
+              <input
+                type="text"
+                value={form.requester_email}
+                readOnly
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: "1px solid #d1d5db",
+                  fontSize: "14px",
+                  background: "#f9fafb",
+                  color: "#374151",
+                }}
+              />
+            </div>
+
+            {/* PL Selection */}
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: "14px", color: "#374151" }}>
+                Product Line Manager *
+              </label>
+              <select
+                value={form.product_line_responsible_email}
+                onChange={(e) => {
+                  const selected = plUsers.find((u) => u.email === e.target.value);
+                  setField("product_line_responsible_email", e.target.value);
+                  if (selected) {
+                    setField("product_line_responsible_name", selected.name);
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: errors.product_line_responsible_email ? "1px solid #ef4444" : "1px solid #d1d5db",
+                  fontSize: "14px",
+                  background: "white",
+                }}
+              >
+                <option value="">-- Select Product Line Manager --</option>
+                {plUsers.map((user) => (
+                  <option key={user.email} value={user.email}>
+                    {user.name} ({user.email})
+                  </option>
+                ))}
+              </select>
+              {errors.product_line_responsible_email && (
+                <div style={{ color: "#ef4444", marginTop: 6, fontSize: "14px" }}>
+                  {errors.product_line_responsible_email}
+                </div>
+              )}
+            </div>
+
+            {/* VP Selection */}
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: "14px", color: "#374151" }}>
+                VP / Escalation (Optional)
+              </label>
+              <select
+                value={form.vp_email || ""}
+                onChange={(e) => {
+                  const selected = vpUsers.find((u) => u.email === e.target.value);
+                  setField("vp_email", e.target.value || null);
+                  if (selected) {
+                    setField("vp_name", selected.name);
+                  } else {
+                    setField("vp_name", "");
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: errors.vp_email ? "1px solid #ef4444" : "1px solid #d1d5db",
+                  fontSize: "14px",
+                  background: "white",
+                }}
+              >
+                <option value="">-- Select VP (Optional) --</option>
+                {vpUsers.map((user) => (
+                  <option key={user.email} value={user.email}>
+                    {user.name} ({user.email})
+                  </option>
+                ))}
+              </select>
+              {errors.vp_email && (
+                <div style={{ color: "#ef4444", marginTop: 6, fontSize: "14px" }}>{errors.vp_email}</div>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Section 5: Initial Comments (Discussion) */}
+        <div style={{ marginBottom: 24 }}>
+          <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: 700 }}>
+            💬 Initial Comments (Optional)
+          </h3>
+          <p style={{ margin: "0 0 12px 0", color: "#666", fontSize: "14px" }}>
+            Add any initial comments for discussion. The Product Line Manager and VP can respond once they review the request.
+          </p>
+          <textarea
+            value={form.problem_to_solve || ""}
+            onChange={(e) => setField("problem_to_solve", e.target.value)}
+            rows={6}
+            style={{
+              width: "100%",
+              borderRadius: 10,
+              border: errors.problem_to_solve ? "1px solid #ef4444" : "1px solid #d1d5db",
+              padding: 12,
+              outline: "none",
+              fontFamily: "inherit",
+              fontSize: "14px",
+            }}
+            placeholder="Share your thoughts, concerns, or any additional information that might help in the decision-making process..."
+          />
+          {errors.problem_to_solve && <div style={{ color: "#ef4444", marginTop: 6, fontSize: "14px" }}>{errors.problem_to_solve}</div>}
         </div>
 
         {/* Alerts and Actions */}
