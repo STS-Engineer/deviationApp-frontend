@@ -18,6 +18,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"email" | "verification">("email");
+  const [isRetryingVerification, setIsRetryingVerification] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -76,7 +77,45 @@ export default function Login() {
         navigate("/");
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Verification failed");
+      const detail = err.response?.data?.detail || "Verification failed";
+
+      if (
+        !isRetryingVerification &&
+        typeof detail === "string" &&
+        detail.toLowerCase().includes("no verification code sent")
+      ) {
+        try {
+          setIsRetryingVerification(true);
+          await api.post("/auth/send-verification-code", {
+            email: email.toLowerCase(),
+            role: role.toUpperCase(),
+          });
+
+          const retryResponse = await api.post("/auth/verify-code", {
+            email: email.toLowerCase(),
+            code: verificationCode.trim(),
+            role: role.toUpperCase(),
+          });
+
+          await login(retryResponse.data.email, retryResponse.data.role);
+
+          if (retryResponse.data.role === "PL") {
+            navigate("/pl");
+          } else if (retryResponse.data.role === "VP") {
+            navigate("/vp");
+          } else {
+            navigate("/");
+          }
+
+          return;
+        } catch (retryErr: any) {
+          setError(retryErr.response?.data?.detail || "Verification failed");
+        } finally {
+          setIsRetryingVerification(false);
+        }
+      } else {
+        setError(detail);
+      }
     } finally {
       setLoading(false);
     }

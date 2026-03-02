@@ -87,7 +87,7 @@ export default function CommercialDashboard() {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <h1 style={{ margin: 0, color: "#ffffff" }}>
+          <h1 style={{ margin: 0, color: "#0f2a44" }}>
             📝 My Requests Dashboard
             {stats.pending > 0 && (
               <span style={{
@@ -103,7 +103,7 @@ export default function CommercialDashboard() {
               </span>
             )}
           </h1>
-          <p style={{ margin: "8px 0 0 0", color: "#e0e0e0", fontSize: "14px" }}>Track all your pricing deviation requests</p>
+          <p style={{ margin: "8px 0 0 0", color: "#334155", fontSize: "14px" }}>Track all your pricing deviation requests</p>
         </div>
         <button
           onClick={handleRefresh}
@@ -124,7 +124,7 @@ export default function CommercialDashboard() {
         </button>
       </div>
 
-      <div style={{ fontSize: "12px", color: "#999" }}>
+      <div style={{ fontSize: "12px", color: "#475569" }}>
         Last updated: {lastRefresh.toLocaleTimeString()}
       </div>
 
@@ -159,7 +159,7 @@ export default function CommercialDashboard() {
       </div>
 
       {/* Requests Table */}
-      <div style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
         {filteredRequests.length === 0 ? (
           <div style={{ padding: "40px", textAlign: "center", color: "#999" }}>
             No requests found for this filter.
@@ -256,10 +256,11 @@ function StatCard({ label, value, color }: { label: string; value: number; color
   return (
     <div
       style={{
-        background: "white",
+        background: "rgba(255,255,255,0.92)",
         padding: "20px",
         borderRadius: "12px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        border: "1px solid #e5e7eb",
         borderLeft: `4px solid ${color}`,
       }}
     >

@@ -55,7 +55,7 @@ export default function PLInbox() {
 
       {/* Header */}
       <div>
-        <h1 style={{ margin: 0, color: "#ffffff" }}>
+        <h1 style={{ margin: 0, color: "#0f2a44" }}>
           🔍 Product Line Inbox
           {!showArchived && pendingRequests.length > 0 && (
             <span style={{
@@ -71,7 +71,7 @@ export default function PLInbox() {
             </span>
           )}
         </h1>
-        <p style={{ margin: "8px 0 0 0", color: "#e0e0e0", fontSize: "14px" }}>
+        <p style={{ margin: "8px 0 0 0", color: "#334155", fontSize: "14px" }}>
           {showArchived ? "View archived requests and continue discussions" : "Review and approve pricing deviation requests"}
         </p>
       </div>
@@ -118,7 +118,7 @@ export default function PLInbox() {
       </div>
 
       {/* Requests Table */}
-      <div style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
         {displayedRequests.length === 0 ? (
           <div style={{ padding: "60px 20px", textAlign: "center", color: "#999" }}>
             <div style={{ fontSize: "48px", marginBottom: "12px" }}>
@@ -249,10 +249,11 @@ function StatCard({ label, value, color, icon }: { label: string; value: number 
   return (
     <div
       style={{
-        background: "white",
+        background: "rgba(255,255,255,0.92)",
         padding: "20px",
         borderRadius: "12px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        border: "1px solid #e5e7eb",
         borderLeft: `4px solid ${color}`,
       }}
     >

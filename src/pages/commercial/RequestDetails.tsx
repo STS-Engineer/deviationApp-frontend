@@ -67,7 +67,7 @@ export default function RequestDetails() {
 
       {/* Status & Pricing Overview */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px" }}>
-        <div style={{ background: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "rgba(255,255,255,0.92)", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
           <div style={{ color: "#666", fontSize: "13px", marginBottom: "8px" }}>Status</div>
           <StatusBadge status={request.status} />
           <div style={{ fontSize: "12px", color: "#999", marginTop: "8px" }}>
@@ -75,7 +75,7 @@ export default function RequestDetails() {
           </div>
         </div>
 
-        <div style={{ background: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "rgba(255,255,255,0.92)", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
           <div style={{ color: "#666", fontSize: "13px", marginBottom: "8px" }}>Price Deviation</div>
           <div style={{ fontSize: "24px", fontWeight: 700, color: "#dc3545" }}>
             -€{priceDiff.toFixed(2)} ({priceDiffPct}%)
@@ -86,7 +86,7 @@ export default function RequestDetails() {
         </div>
 
         {request.final_approved_price && (
-          <div style={{ background: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+          <div style={{ background: "rgba(255,255,255,0.92)", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
             <div style={{ color: "#666", fontSize: "13px", marginBottom: "8px" }}>Final Approved Price</div>
             <div style={{ fontSize: "24px", fontWeight: 700, color: "#10b981" }}>
               €{request.final_approved_price.toFixed(2)}
@@ -99,7 +99,7 @@ export default function RequestDetails() {
       </div>
 
       {/* Request Details */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "grid", gap: "20px" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "grid", gap: "20px", border: "1px solid #e5e7eb" }}>
         <h3 style={{ margin: 0, color: "#0f2a44" }}>Request Details</h3>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
@@ -131,7 +131,7 @@ export default function RequestDetails() {
       </div>
 
       {/* Contacts */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "grid", gap: "20px" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "grid", gap: "20px", border: "1px solid #e5e7eb" }}>
         <h3 style={{ margin: 0, color: "#0f2a44" }}>Contacts</h3>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
@@ -231,7 +231,7 @@ export default function RequestDetails() {
       )}
 
       {/* Comments Thread */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
         {request.id && user?.email && (
           <CommentsThread requestId={request.id} currentUserEmail={user.email} />
         )}

@@ -192,7 +192,7 @@ export default function CreateRequest() {
         </p>
       </div>
 
-      <div style={{ background: "white", borderRadius: 12, padding: 24, boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: 12, padding: 24, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
         {/* Section 1: Request Details */}
         <div style={{ marginBottom: 24 }}>
           <h3 style={{ margin: "0 0 16px 0", fontSize: "16px", fontWeight: 700 }}>Request Information</h3>

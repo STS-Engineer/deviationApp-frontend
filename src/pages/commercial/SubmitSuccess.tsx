@@ -17,7 +17,7 @@ export default function SubmitSuccess() {
 
       <h2 style={{ margin: 0 }}>Request submitted ✅</h2>
 
-      <div style={{ background: "white", borderRadius: 12, padding: 18, boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", borderRadius: 12, padding: 18, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
         <div style={{ display: "grid", gap: 8 }}>
           <div><strong>Request ID:</strong> {requestId ?? "-"}</div>
           <div><strong>Status:</strong> {status ?? "-"}</div>

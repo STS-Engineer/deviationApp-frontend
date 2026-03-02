@@ -21,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const login = async (email: string, role: UserRole = "COMMERCIAL") => {
     setLoading(true);
@@ -44,9 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Restore user from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      setUser(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        setUser(JSON.parse(stored));
+      }
+    } finally {
+      setLoading(false);
     }
   }, []);
 

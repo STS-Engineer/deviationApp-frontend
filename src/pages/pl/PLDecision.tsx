@@ -115,7 +115,7 @@ export default function PLDecision() {
       </div>
 
       {/* Problem Description */}
-      <div style={{ background: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
         <h3 style={{ margin: "0 0 12px 0", color: "#0f2a44" }}>Problem to Solve</h3>
         <div style={{ padding: "12px", background: "#f8f9fa", borderRadius: "6px", lineHeight: "1.6", color: "#333" }}>
           {request.problem_to_solve}
@@ -123,7 +123,7 @@ export default function PLDecision() {
       </div>
 
       {/* Decision Form */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "grid", gap: "20px" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", display: "grid", gap: "20px", border: "1px solid #e5e7eb" }}>
         <h3 style={{ margin: 0, color: "#0f2a44" }}>Your Decision</h3>
 
         {/* Action Selection */}
@@ -247,7 +247,7 @@ export default function PLDecision() {
       </div>
 
       {/* Comments Thread */}
-      <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+      <div style={{ background: "rgba(255,255,255,0.92)", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
         {request.id && user?.email && (
           <CommentsThread requestId={request.id} currentUserEmail={user.email} />
         )}
@@ -258,7 +258,7 @@ export default function PLDecision() {
 
 function InfoCard({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div style={{ background: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+    <div style={{ background: "rgba(255,255,255,0.92)", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", border: "1px solid #e5e7eb" }}>
       <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: 600 }}>
         {label}
       </div>
