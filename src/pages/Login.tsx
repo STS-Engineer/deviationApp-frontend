@@ -15,6 +15,7 @@ export default function Login() {
   const [role, setRole] = useState<UserRole>("COMMERCIAL");
   const [users, setUsers] = useState<UserOption[]>([]);
   const [verificationCode, setVerificationCode] = useState("");
+  const [verificationToken, setVerificationToken] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"email" | "verification">("email");
@@ -42,10 +43,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await api.post("/auth/send-verification-code", {
+      const response = await api.post("/auth/send-verification-code", {
         email: email.toLowerCase(),
         role: role.toUpperCase(),
       });
+      setVerificationCode("");
+      setVerificationToken(response.data?.verification_token || "");
       setStep("verification");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Failed to send verification code");
@@ -57,6 +60,12 @@ export default function Login() {
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!verificationToken) {
+      setError("Verification session expired. Click Back and request a new code.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -64,6 +73,7 @@ export default function Login() {
         email: email.toLowerCase(),
         code: verificationCode.trim(),
         role: role.toUpperCase(),
+        verification_token: verificationToken || undefined,
       });
 
       await login(response.data.email, response.data.role);
@@ -76,7 +86,12 @@ export default function Login() {
         navigate("/");
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Verification failed");
+      const detail = err.response?.data?.detail || "Verification failed";
+      if (typeof detail === "string" && detail.toLowerCase().includes("no verification code sent")) {
+        setError("Verification session expired. Click Back and request a new code.");
+      } else {
+        setError(detail);
+      }
     } finally {
       setLoading(false);
     }
@@ -274,6 +289,7 @@ export default function Login() {
               onClick={() => {
                 setStep("email");
                 setVerificationCode("");
+                setVerificationToken("");
                 setError("");
               }}
               style={{
